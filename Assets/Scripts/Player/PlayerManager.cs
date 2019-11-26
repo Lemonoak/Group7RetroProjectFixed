@@ -21,13 +21,14 @@ public class PlayerManager : MonoBehaviour
     GameObject playerTwo;
 
     GameModeController gameMode;
-    PlayerJoinTextHandler textaManeger;
+    PlayerJoinTextHandler textManager;
 
     float restartTime = 0;
     float idleTime = 60;
 
     bool original = false;
     public bool screenlayingDown = false;
+
     private void Awake()
     {
         gameMode = GetComponent<GameModeController>();
@@ -46,6 +47,7 @@ public class PlayerManager : MonoBehaviour
             Destroy(gameObject);
         }
     }
+
     private void Update()
     {
         if (Input.GetButtonDown("QuitGame"))
@@ -76,7 +78,7 @@ public class PlayerManager : MonoBehaviour
                 }
                 else if (Time.fixedTime > idleTime + restartTime)
                 {
-                    playerOneIsIn = false; 
+                    playerOneIsIn = false;
                     playerTwoIsIn = false;
                     SceneManager.LoadScene(1);
                 }
@@ -93,6 +95,7 @@ public class PlayerManager : MonoBehaviour
             RestartLevel();
         }
     }
+
     private void OnLevelWasLoaded(int level)
     {
         if (original)
@@ -105,10 +108,11 @@ public class PlayerManager : MonoBehaviour
             }
         }
     }
+
     void CreatePlayers()
     {
-        textaManeger = FindObjectOfType<PlayerJoinTextHandler>();
-        textaManeger.GetPlayers(playerOneIsIn, playerTwoIsIn,screenlayingDown);
+        textManager = FindObjectOfType<PlayerJoinTextHandler>();
+        textManager.GetPlayers(playerOneIsIn, playerTwoIsIn,screenlayingDown);
         if (playerOneIsIn)
         {
             playerOne = Instantiate(playerGameobject, startPosiotion1, ref_StartRotation1);
@@ -128,10 +132,12 @@ public class PlayerManager : MonoBehaviour
         }
         playerTwo.transform.eulerAngles = new Vector3(0, 0, 90);   
     }
+
     void RotateField()
     {
         gameMode.RotateAll(screenlayingDown);
     }
+
     void RestartLevel()
     {
         if (playerOne.tag == "Player")

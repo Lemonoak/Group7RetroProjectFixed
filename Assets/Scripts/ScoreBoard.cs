@@ -31,7 +31,6 @@ public class ScoreBoard : MonoBehaviour
     public List<Round> player1RoundWins;
     public List<Round> player2RoundWins;
 
-
     // Start is called before the first frame update
     void Start()
     {
@@ -39,14 +38,8 @@ public class ScoreBoard : MonoBehaviour
         blinktime = player1Icons[0].animationLenght;
     }
 
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
     public void BabyGotHit(float ballSpeed, int pickuptype)
     {
-        
         if (ballSpeed > 0)
         {
             if (Time.fixedTime > animationdelay1 + blinktime)
@@ -112,24 +105,10 @@ public class ScoreBoard : MonoBehaviour
     }
     public void Scored (int playerGoal, float score) // score is standin
     {
-        // musk.GetComponent<AudioSource>().Pause();
         musk.GetComponent<AudioSource>().volume = 0.3f;
         hasScored = true;
         PlayerScoar = playerGoal;
-        /*
-        if (PlayerScoar == 1)
-        {
-            roundWinP1++;
-            roundwins(player1RoundWins, roundWinP1);
-            scoreboardPlayer1.NewScoreAdd(score);
-        }
-        else
-        {
-            roundWinP2++;
-            roundwins(player2RoundWins, roundWinP2);
-            scoreboardPlayer2.NewScoreAdd(score);
-        }
-        */
+
         if (PlayerScoar == 1)
         {
             roundWinP1++;
@@ -149,16 +128,7 @@ public class ScoreBoard : MonoBehaviour
         {
             hasScored = false;
             musk.GetComponent<AudioSource>().volume = 0.75f;
-            /*
-            if (PlayerScoar == 1)
-            {            
-                MonkeyArmP1.MoveArmAnimation();
-            }
-            else
-            {
-                MonkeyArmP2.MoveArmAnimation();
-            }
-            */
+
             if (PlayerScoar == 1)
             {
                 MonkeyArmP2.MoveArmAnimation();
