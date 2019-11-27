@@ -55,6 +55,7 @@ public class PlayerManager : MonoBehaviour
 
     private void Update()
     {
+        //Handles leaving the game or making players leave
         if (Input.GetButtonDown("QuitGame"))
         {
             if (!GameObject.FindWithTag("Player"))
@@ -68,6 +69,7 @@ public class PlayerManager : MonoBehaviour
             }
         }
 
+        //Handles one player only leaving the game
         if(GameObject.FindWithTag("Player") && (Input.GetButtonDown("Return1") && playerOneIsIn))
         {
             DisablePlayerOne();
@@ -77,6 +79,7 @@ public class PlayerManager : MonoBehaviour
             DisablePlayerTwo();
         }
 
+        //Kicks players after set amount of time
         if (idleTime != 0 && (playerOneIsIn || playerTwoIsIn))
             {
                 if (Input.GetAxis("Movement1") != 0 || Input.GetAxis("Movement2") != 0)
@@ -90,6 +93,7 @@ public class PlayerManager : MonoBehaviour
                 }
             }
 
+        //Handles joining the game
         if (Input.GetButtonDown("Start1") && !playerOneIsIn)
         {
             PlayerOneJoin();
@@ -100,6 +104,7 @@ public class PlayerManager : MonoBehaviour
         }
     }
 
+    //Creates players and ai when main game scene loads
     private void OnLevelWasLoaded(int level)
     {
         if (original)

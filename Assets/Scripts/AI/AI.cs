@@ -9,10 +9,6 @@ public class AI : MonoBehaviour
 
     public float AISpeed = 10.0f;
 
-    public string movementkey;
-    public string specialKey;
-    bool hasNewPlayer;
-
     SpriteRenderer sR;
     public Sprite hitAni;
     Sprite defSpr;

@@ -24,6 +24,7 @@ public class BallMovement : MonoBehaviour
     public AudioSource tickSource;
 
     bool PlayerSmashed = false;
+    [SerializeField]
     Vector2 oldVelocty;
     float maxVelocityPart = 1;
     float funXSpeed = 8;
@@ -36,7 +37,7 @@ public class BallMovement : MonoBehaviour
         Ball = gameObject;
         //Randomzies direction to start and adds force on the ball
         //RandomizeStartDirection();
-        oldVelocty = RB.velocity;
+        //oldVelocty = RB.velocity;
     }
 
     private void OnEnable()
@@ -114,10 +115,12 @@ public class BallMovement : MonoBehaviour
         if (transform.position.x > 0)
         {
             RB.AddForce(new Vector2(StartSpeed, (StartSpeed / startAngle) * num[startDir]));
+            oldVelocty = RB.velocity;
         }
         else
         {
             RB.AddForce(new Vector2(-StartSpeed, (StartSpeed / startAngle) * num[startDir]));
+            oldVelocty = RB.velocity;
         }
     }
     private void OnCollisionEnter2D(Collision2D collision)
@@ -138,7 +141,7 @@ public class BallMovement : MonoBehaviour
             {
                 RemoveSpeed();
             }
-            else if(Mathf.Abs(oldVelocty.x) + Mathf.Abs(oldVelocty.x) < Mathf.Abs(RB.velocity.x) + Mathf.Abs(RB.velocity.x))
+            else if(Mathf.Abs(oldVelocty.x) + Mathf.Abs(oldVelocty.y) < Mathf.Abs(RB.velocity.x) + Mathf.Abs(RB.velocity.y))
             {
                 oldVelocty = RB.velocity;
             }
@@ -194,6 +197,7 @@ public class BallMovement : MonoBehaviour
 
     public void ResetVelocity()
     {
+        PlayerSmashed = false;
         RB.velocity = Vector2.zero;
         RB.angularVelocity = 0;
     }
