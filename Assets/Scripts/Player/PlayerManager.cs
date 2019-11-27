@@ -5,11 +5,13 @@ using UnityEngine.SceneManagement;
 
 public class PlayerManager : MonoBehaviour
 {
-    Vector3 startPosiotion1 = new Vector3(-15.75f,0,0);
-    Vector3 startPosiotion2 = new Vector3(15.75f,0,0);
+    //TODO: Removed unnecessary commented/unused code
+    //TODO: Split each section of variables with a empty line for readability
+    Vector3 leftStartPosition = new Vector3(-15.75f,0,0);
+    Vector3 rightStartPosition = new Vector3(15.75f,0,0);
 
-    Quaternion ref_StartRotation1;
-    Quaternion ref_StartRotation2;
+    Quaternion ref_LeftRotation;
+    Quaternion ref_RightRotation;
 
     bool playerOneIsIn = false;
     bool playerTwoIsIn = false;
@@ -19,6 +21,9 @@ public class PlayerManager : MonoBehaviour
 
     GameObject playerOne;
     GameObject playerTwo;
+
+    GameObject aiOne;
+    GameObject aiTwo;
 
     GameModeController gameMode;
     PlayerJoinTextHandler textManager;
@@ -58,16 +63,18 @@ public class PlayerManager : MonoBehaviour
             }
             else
             {
-                playerOneIsIn = false;
-                playerTwoIsIn = false;
-                SceneManager.LoadScene(1);
+                DisablePlayerOne();
+                DisablePlayerTwo();
             }
         }
-        if(GameObject.FindWithTag("Player") && (Input.GetButtonDown("Return1") && playerOneIsIn) || (Input.GetButtonDown("Return2") && playerTwoIsIn))
+
+        if(GameObject.FindWithTag("Player") && (Input.GetButtonDown("Return1") && playerOneIsIn))
         {
-            playerOneIsIn = false;
-            playerTwoIsIn = false;
-            SceneManager.LoadScene(1);
+            DisablePlayerOne();
+        }
+        else if(GameObject.FindWithTag("Player") && (Input.GetButtonDown("Return2") && playerTwoIsIn))
+        {
+            DisablePlayerTwo();
         }
 
         if (idleTime != 0 && (playerOneIsIn || playerTwoIsIn))
@@ -78,28 +85,25 @@ public class PlayerManager : MonoBehaviour
                 }
                 else if (Time.fixedTime > idleTime + restartTime)
                 {
-                    playerOneIsIn = false;
-                    playerTwoIsIn = false;
-                    SceneManager.LoadScene(1);
+                    DisablePlayerOne();
+                    DisablePlayerTwo();
                 }
             }
 
         if (Input.GetButtonDown("Start1") && !playerOneIsIn)
         {
-            playerOneIsIn = true;
-            RestartLevel();
+            PlayerOneJoin();
         }
         if (Input.GetButtonDown("Start2") && !playerTwoIsIn)
         {
-            playerTwoIsIn = true;
-            RestartLevel();
+            PlayerTwoJoin();
         }
     }
 
     private void OnLevelWasLoaded(int level)
     {
         if (original)
-        {        
+        {
             RotateField();
             restartTime = Time.fixedTime;
             if (!GameObject.FindWithTag("AI") && !GameObject.FindWithTag("Player"))
@@ -109,28 +113,28 @@ public class PlayerManager : MonoBehaviour
         }
     }
 
+    //TODO: Create the players and ai objects when entering main game scene for enabling / disabling later
     void CreatePlayers()
     {
         textManager = FindObjectOfType<PlayerJoinTextHandler>();
-        textManager.GetPlayers(playerOneIsIn, playerTwoIsIn,screenlayingDown);
-        if (playerOneIsIn)
-        {
-            playerOne = Instantiate(playerGameobject, startPosiotion1, ref_StartRotation1);
-        }
-        else
-        {
-            playerOne = Instantiate(aIGameobject, startPosiotion1, ref_StartRotation1);
-        }
+        textManager.GetPlayers(playerOneIsIn, playerTwoIsIn, screenlayingDown);
+
+        //Spawn Players
+        playerOne = Instantiate(playerGameobject, leftStartPosition, ref_LeftRotation);
         playerOne.transform.eulerAngles = new Vector3(0, 0, -90);
-        if (playerTwoIsIn)
-        {
-            playerTwo = Instantiate(playerGameobject, startPosiotion2, ref_StartRotation2);
-        }
-        else
-        {
-            playerTwo = Instantiate(aIGameobject, startPosiotion2, ref_StartRotation2);
-        }
-        playerTwo.transform.eulerAngles = new Vector3(0, 0, 90);   
+        playerOne.SetActive(false);
+
+        playerTwo = Instantiate(playerGameobject, rightStartPosition, ref_RightRotation);
+        playerTwo.transform.eulerAngles = new Vector3(0, 0, 90);
+        playerTwo.SetActive(false);
+
+        //Spawn AI
+        aiOne = Instantiate(aIGameobject, leftStartPosition, ref_LeftRotation);
+        aiOne.transform.eulerAngles = new Vector3(0, 0, -90);
+
+        aiTwo = Instantiate(aIGameobject, rightStartPosition, ref_RightRotation);
+        aiTwo.transform.eulerAngles = new Vector3(0, 0, 90);
+
     }
 
     void RotateField()
@@ -138,25 +142,55 @@ public class PlayerManager : MonoBehaviour
         gameMode.RotateAll(screenlayingDown);
     }
 
-    void RestartLevel()
+    //TODO: I created all functions below to enable / disable players and ai instead of reloading the scene, this decreased ms spikes, Only the playerone is commented since playertwo works the same
+    void PlayerOneJoin()
     {
-        if (playerOne.tag == "Player")
-        {
-            startPosiotion1 = playerOne.transform.position;
-        }
-        else
-        {
-            startPosiotion1 = new Vector3(-15.75f, 0, 0);
-        }
-        if (playerTwo.tag == "Player")
-        {
-            startPosiotion2 = playerTwo.transform.position;
-        }
-        else
-        {
-            startPosiotion2 = new Vector3(15.75f, 0, 0);
-        }
-        SceneManager.LoadScene(1);
+        //Sets playerOneIsIn to true to be able to leave properly
+        playerOneIsIn = true;
+        //Disables ai
+        aiOne.SetActive(false);
+
+        //Sets player transform position to start position and enables player
+        playerOne.transform.position = leftStartPosition;
+        playerOne.SetActive(true);
+        //Disables "JOIN GAME" text
+        textManager.GetPlayers(playerOneIsIn, playerTwoIsIn, screenlayingDown);
     }
+
+    void DisablePlayerOne()
+    {
+        //sets playerOneIsIn to false and disables player object
+        playerOneIsIn = false;
+        playerOne.SetActive(false);
+        //Sets ai transform to startpostion and enables ai object
+        aiOne.transform.position = leftStartPosition;
+        aiOne.SetActive(true);
+
+        //Enables "JOIN GAME" text
+        textManager.GetPlayers(playerOneIsIn, playerTwoIsIn, screenlayingDown);
+    }
+
+    void PlayerTwoJoin()
+    {
+        playerTwoIsIn = true;
+        aiTwo.SetActive(false);
+
+        playerTwo.transform.position = rightStartPosition;
+        playerTwo.SetActive(true);
+
+        textManager.GetPlayers(playerOneIsIn, playerTwoIsIn, screenlayingDown);
+    }
+
+    void DisablePlayerTwo()
+    {
+        playerTwoIsIn = false;
+        playerTwo.SetActive(false);
+        aiTwo.transform.position = rightStartPosition;
+        aiTwo.SetActive(true);
+
+        textManager.GetPlayers(playerOneIsIn, playerTwoIsIn, screenlayingDown);
+    }
+
+
 
 }
