@@ -6,8 +6,9 @@ using UnityEngine;
 public class BallMovement : MonoBehaviour
 {
     public ScoreBoard board;
+    [SerializeField]
     private Rigidbody2D RB;
-    public GameObject spawner;
+    public BallSpawner spawner;
     //for the AI to see the ball
     public GameObject Ball;
 
@@ -22,10 +23,6 @@ public class BallMovement : MonoBehaviour
     public float StartSpeed = 1.0f;
     public AudioSource tickSource;
 
-
-    float CurrentX = 0.0f;
-    float CurrentY = 0.0f;
-
     bool PlayerSmashed = false;
     Vector2 oldVelocty;
     float maxVelocityPart = 1;
@@ -35,71 +32,42 @@ public class BallMovement : MonoBehaviour
     void Start()
     {
         tickSource = GetComponent<AudioSource>();
-        RB = GetComponent<Rigidbody2D>();       
+        RB = Ball.GetComponent<Rigidbody2D>();       
         Ball = gameObject;
         //Randomzies direction to start and adds force on the ball
-        RandomizeStartDirection();
+        //RandomizeStartDirection();
         oldVelocty = RB.velocity;
+    }
+
+    private void OnEnable()
+    {
+        RB = Ball.GetComponent<Rigidbody2D>();
+        RB.velocity = Vector2.zero;
+        RandomizeStartDirection();
+    }
+
+    private void OnDisable()
+    {
+        ResetVelocity();
     }
 
     void Update()
     {
-        /*
-        //Makes the ball add velocity upwards if it happens to only go on the x axis
-        if (RB.velocity.y == 0)
-        {
-            RB.velocity += new Vector2(0.0f, RB.velocity.y + 0.2f);
-        }
-        
-
-        CurrentX = Mathf.Round(RB.velocity.x);
-        CurrentY = Mathf.Round(RB.velocity.y);
-
-        //Sets a float to make score depend on velocity
-        //CurrentBallSpeed = CurrentX + CurrentY;
-
-        if (CurrentX < 0 && CurrentY < 0)
-        {
-            CurrentBallSpeed = Mathf.Abs(CurrentY) + Mathf.Abs(CurrentX);
-            //Debug.Log("  Ball Speed  X , Y = " + Mathf.Round(CurrentBallSpeed));
-            //Debug.Log("  Y   " + CurrentY);
-            //Debug.Log("  X   " + CurrentX);
-        }
-        else if (CurrentX < 0)
-        {
-
-            CurrentBallSpeed = Mathf.Abs(CurrentX) + CurrentY;
-            //Debug.Log("  Ball Speed   X = " + Mathf.Round(CurrentBallSpeed));
-            //Debug.Log("  X   " + CurrentX);
-            //Debug.Log("  Y   " + CurrentY);
-        }
-        else if (CurrentY < 0)
-        {
-
-            CurrentBallSpeed = Mathf.Abs(CurrentY) + CurrentX;
-            //Debug.Log("  Ball Speed  Y = " + Mathf.Round(CurrentBallSpeed));
-            //Debug.Log("  Y   " + CurrentY);
-            //Debug.Log("  X   " + CurrentX);
-        }
-        */
-
         RB.velocity += new Vector2(RB.velocity.x * SpeedUpValue, RB.velocity.y * SpeedUpValue);
 
         if(Ball.transform.position.x < - 5000)
         {
-            Destroy(gameObject);
+            spawner.DisableBall();
         }
         else if (Ball.transform.position.x > 5000)
         {
-            Destroy(gameObject);
+            spawner.DisableBall();
         }
         
         if(RB.velocity.x != 0)
         {
             RB.velocity = Maxvelocity(); // the y speed relative to x need to be fixt
         }
-        
-
     }
 
     Vector2 Maxvelocity()
@@ -119,14 +87,6 @@ public class BallMovement : MonoBehaviour
         {
             velocityClamp.x -= (funYSpeed - velocityClamp.y);
             velocityClamp.y = funYSpeed;
-            /*
-            for (; velocityClamp.x / velocityClamp.y > maxVelocityPart;)
-            {
-                remainder = velocityClamp.x * 0.05f;
-                velocityClamp.y += remainder;
-                velocityClamp.x -= remainder;
-            }
-            */
         }
         if (velocityClamp.x + velocityClamp.y < Mathf.Abs(oldVelocty.x) + Mathf.Abs(oldVelocty.y))
         {
@@ -145,7 +105,7 @@ public class BallMovement : MonoBehaviour
         return velocityClamp;
     }
     //Sets the start direction and adds force to the ball in that direction
-    void RandomizeStartDirection()
+    public void RandomizeStartDirection()
     {
         int[] num = new int[] {-1,1};
         int startDir = Random.Range(0, 2);
@@ -162,7 +122,7 @@ public class BallMovement : MonoBehaviour
     }
     private void OnCollisionEnter2D(Collision2D collision)
     {
-            tickSource.Play();
+        tickSource.Play();
     }
     private void OnTriggerEnter2D(Collider2D collision)
     {
@@ -200,23 +160,16 @@ public class BallMovement : MonoBehaviour
         }
         else if (collision.tag == "Goal")
         {
-            //ERROR HANDLING
-            if (collision.GetComponent<Goal>() != null)
+            if (transform.position.x < 0)
             {
-                if (transform.position.x < 0)
-                {
-                    board.Scored(2, Mathf.Abs(RB.velocity.x) + Mathf.Abs(RB.velocity.y));
-                }
-                else
-                {
-                    board.Scored(1, Mathf.Abs(RB.velocity.x) + Mathf.Abs(RB.velocity.y));
-                }
-                Destroy(gameObject);
+                board.Scored(2, Mathf.Abs(RB.velocity.x) + Mathf.Abs(RB.velocity.y));
             }
             else
             {
-                Debug.Log("Goal is missing goal component or has the wrong GoalName");
+                board.Scored(1, Mathf.Abs(RB.velocity.x) + Mathf.Abs(RB.velocity.y));
             }
+            //TODO: Disabled Ball
+            spawner.DisableBall();
         }
     }
 
@@ -232,5 +185,16 @@ public class BallMovement : MonoBehaviour
     {
         PlayerSmashed = false;
         RB.velocity = new Vector2(oldVelocty.x, oldVelocty.y);
+    }
+
+    public void SetSpawner(BallSpawner spawner)
+    {
+        this.spawner = spawner;
+    }
+
+    public void ResetVelocity()
+    {
+        RB.velocity = Vector2.zero;
+        RB.angularVelocity = 0;
     }
 }

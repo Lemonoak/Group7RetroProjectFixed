@@ -12,36 +12,36 @@ public class BallSpawner : MonoBehaviour
     public GameObject[] AIReference;
     public GameObject musk;
 
+    Vector2 ballSpawnPosition;
+    GameObject mainBall;
 
-    // Start is called before the first frame update
-    void Start()
+
+    private void Start()
     {
-
+        mainBall = (GameObject)Instantiate(spawnrefObject, ballSpawnPosition, Quaternion.identity);
+        mainBall.GetComponent<BallMovement>().board = scoreBoard;
+        mainBall.GetComponent<BallMovement>().SetSpawner(this);
+        mainBall.SetActive(false);
     }
 
-    // Update is called once per frame
-    void Update()
-    {
-
-    }
     public void SpawnBall()
     {
-        // musk.GetComponent<AudioSource>().UnPause();
         musk.GetComponent<AudioSource>().volume = 1f;
-        Vector2 tempVector;
+        //TODO: Removed instantiation of ball everytime someone scores
         if (scoreBoard.PlayerScoar == 1)
         {
-            tempVector = ballSpawnPoint2.transform.position;
+            ballSpawnPosition = ballSpawnPoint2.transform.position;
         }
         else
         {
-            tempVector = ballSpawnPoint1.transform.position;
+            ballSpawnPosition = ballSpawnPoint1.transform.position;
         }
-        spawnedObject = (GameObject)Instantiate(spawnrefObject, tempVector, Quaternion.identity);
-        spawnedObject.GetComponent<BallMovement>().board = scoreBoard;
+        //Set transform of ball to spawnpoint
+        mainBall.transform.position = ballSpawnPosition;
+        mainBall.SetActive(true);
 
         ///////////////////
- 
+
         AIReference = GameObject.FindGameObjectsWithTag("AI");
         //ERROR HANDLING
         if (AIReference.Length == 1)
@@ -53,5 +53,10 @@ public class BallSpawner : MonoBehaviour
             AIReference[0].GetComponent<AI>().GetBall();
             AIReference[1].GetComponent<AI>().GetBall();
         }
+    }
+
+    public void DisableBall()
+    {
+        mainBall.SetActive(false);
     }
 }
